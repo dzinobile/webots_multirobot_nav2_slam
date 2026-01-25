@@ -1,6 +1,14 @@
 <?xml version="1.0" ?>
 <robot name="My robot">
     <webots>
+        <device reference="LDS-01" type="Lidar">
+            <ros>
+                <enabled>true</enabled>
+                <updateRate>5</updateRate>
+                <alwaysOn>false</alwaysOn>
+                <frameName>LDS-01</frameName>
+            </ros>
+        </device>
         <plugin type="my_robot_driver::MyRobotDriver" />
     </webots>
 </robot>

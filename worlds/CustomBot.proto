@@ -7,7 +7,7 @@ PROTO CustomBot [
     field SFString controller "<generic>"
     field MFNode extensionSlot [ 
         RobotisLds01 {
-            rotation 1 0 0 -1.5708
+            rotation 1 0 0 1.5708
             translation 0 -0.05 0 
          }]
 
@@ -145,19 +145,41 @@ PROTO CustomBot [
             }
             }
             Transform {
-            children [
-                Shape {
-                appearance PBRAppearance {
-                    baseColor 0 0 1
-                    roughness 1
-                    metalness 0
-                }
-                geometry DEF BODY Mesh {
-                    url "meshes/base_link.dae"
-                }
-                }
-            ]
+                children [
+                    Shape {
+                        appearance PBRAppearance {
+                            baseColor 0 0 1
+                            roughness 1
+                            metalness 0
+                        }
+                        geometry DEF BODY Mesh {
+                            url "meshes/base_link.dae"
+                        }
+                    }
+                ]
             }
+            Camera {
+                translation 0 -0.1 0 
+                rotation 1 0 0 1.5708
+                children [
+                    DEF CAMERA Transform {
+                        children [
+                            Shape {
+                                appearance PBRAppearance {
+                                    baseColor 1 1 0
+                                    roughness 1
+                                    metalness 0
+                                }
+                                geometry Cylinder {
+                                    height 0.004
+                                    radius 0.008
+                                }
+                            }
+                        ]
+                    }
+                ]
+                name "c0"
+            }   
         ]
     boundingObject Transform {
         translation 0 -0.015 0
