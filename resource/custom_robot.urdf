@@ -1,13 +1,20 @@
 <?xml version="1.0" ?>
 <robot name="custom_robot">
     <link name="base_link"/>
+    
+    <link name="lds0_link"/>
+    <joint name="lds0_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lds0_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
     <webots>
-        <device reference="LDS-01" type="Lidar">
+        <device reference="ld0" type="Lidar">
             <ros>
                 <enabled>true</enabled>
                 <updateRate>5</updateRate>
-                <alwaysOn>false</alwaysOn>
-                <frameName>LDS-01</frameName>
+                <alwaysOn>true</alwaysOn>
+                <frameName>lds0</frameName>
             </ros>
         </device>
         <device reference="c0" type="Camera">

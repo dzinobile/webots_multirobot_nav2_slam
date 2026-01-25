@@ -5,11 +5,7 @@ PROTO CustomBot [
     field SFRotation rotation 0 1 0 0
     field SFString name "custom_robot"
     field SFString controller "<generic>"
-    field MFNode extensionSlot [ 
-        RobotisLds01 {
-            rotation 1 0 0 1.5708
-            translation 0 -0.05 0 
-         }]
+    field MFNode extensionSlot [ ]
 
 ]
 {
@@ -159,8 +155,10 @@ PROTO CustomBot [
                 ]
             }
             Camera {
-                translation 0 -0.1 0 
-                rotation 1 0 0 1.5708
+                translation 0 -0.04 -0.02 
+                rotation 0.5774 0.5774 -0.5774 2.0944
+                width 256
+                height 256
                 children [
                     DEF CAMERA Transform {
                         children [
@@ -179,6 +177,29 @@ PROTO CustomBot [
                     }
                 ]
                 name "c0"
+            }
+            Lidar {
+                translation 0 -0.05 0 
+                rotation 0.5774 0.5774 -0.5774 2.0944
+                fieldOfView 3.1415
+                children [
+                    DEF LIDAR Transform {
+                        children [
+                            Shape {
+                                appearance PBRAppearance {
+                                    baseColor 1 1 1
+                                    roughness 1
+                                    metalness 0
+                                }
+                                geometry Cylinder {
+                                    height 0.004
+                                    radius 0.008
+                                }
+                            }
+                        ]
+                    }
+                ]
+                name "ld0"
             }   
         ]
     boundingObject Transform {
