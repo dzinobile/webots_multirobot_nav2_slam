@@ -16,42 +16,65 @@ def generate_launch_description():
     )
 
     robot_drivers = []
-    tf_broadcasters = []
-    world_to_robots = []
+    robot_state_publishers = []
+    static_tf_publishers = []
+    lidar_tf_publishers = []
+
     for i in range (1,3):
         custom_robot_driver = WebotsController(
             robot_name=f'robot{i}',
             parameters=[
                 {'robot_description': robot_description_path},
             ],
-            namespace=f'robot{i}'
+            remappings=[
+                ('cmd_vel', f'robot{i}/cmd_vel'),
+                ('test_vel', f'robot{i}/test_vel')
+            ],
+            # namespace=f'robot{i}'
 
         )
         robot_drivers.append(custom_robot_driver)
 
-        # lidar_tf_broadcaster = Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     output='screen',
+        # robot_state_pub = Node(
+        #     package='robot_state_publisher',
+        #     executable='robot_state_publisher',
         #     namespace=f'robot{i}',
-        #     parameters=[{'robot_name': f'robot{i}'}],
+        #     output='screen',
+        #     parameters=[{
+        #         'robot_description': robot_description_path,
+        #         'frame_prefix': f'robot{i}/'
+        #     }]
         # )
-        # tf_broadcasters.append(lidar_tf_broadcaster)
+        # robot_state_publishers.append(robot_state_pub)
 
-        # world_to_robot = Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     name=f'world_to_robot{i}_broadcaster',
-        #     arguments=['0', '0', '0', '0', '0', '0', 'world', f'robot{i}/base_link']
-        # )
-        # world_to_robots.append(world_to_robot)
+        static_tf = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name=f'world_to_robot{i}',
+            arguments=[
+                '0', str((i-1)*0.5), '0',
+                '0', '0', '0',
+                'world',
+                f'robot{i}/base_link'
+            ]
+        )
+        static_tf_publishers.append(static_tf)
+
+        lidar_tf = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name=f'robot{i}_to_lidar',
+            arguments=['0', '0', '0', '0', '0', '0', f'robot{i}/base_link', 'lidar_frame']
+        )
+        lidar_tf_publishers.append(lidar_tf)
 
 
     return LaunchDescription([
         webots,
         *robot_drivers,
-        # *tf_broadcasters,
-        # *world_to_robots,
+        # *robot_state_publishers,
+        *lidar_tf_publishers,
+        *static_tf_publishers,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,

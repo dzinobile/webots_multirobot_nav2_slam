@@ -16,4 +16,13 @@
         </device>
         <plugin type="my_robot_driver::MyRobotDriver" />
     </webots>
+    <link name="base_link"/>
+
+    <link name="lidar_frame"/>
+    <joint name="lidar_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar_frame"/>
+        <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    </joint>
+    
 </robot>
