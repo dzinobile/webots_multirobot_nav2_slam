@@ -39,6 +39,7 @@ TexturedBackground {
   skybox FALSE
 }
 CustomBot {
+  name "robot1"
   translation 6.36 0 0
   controller "<extern>"
   controllerArgs [

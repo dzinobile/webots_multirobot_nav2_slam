@@ -29,7 +29,8 @@ from launch.actions import IncludeLaunchDescription
 from webots_ros2_driver.webots_launcher import WebotsLauncher
 from webots_ros2_driver.webots_controller import WebotsController
 from webots_ros2_driver.wait_for_controller_connection import WaitForControllerConnection
-
+from launch_ros.actions import PushRosNamespace
+from launch.actions import GroupAction
 
 def generate_launch_description():
     package_dir = get_package_share_directory('webots_diffdrive')
@@ -48,6 +49,7 @@ def generate_launch_description():
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
+        namespace='robot1',
         output='screen',
         parameters=[{
             'robot_description': '<robot name=""><link name=""/></robot>'
@@ -57,8 +59,9 @@ def generate_launch_description():
     footprint_publisher = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
+        namespace='robot1',
         output='screen',
-        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
+        arguments=['0', '0', '0', '0', '0', '0', 'robot1/base_link', 'robot1/base_footprint'],
     )
 
     # ROS control spawners
@@ -67,6 +70,7 @@ def generate_launch_description():
     diffdrive_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
+        namespace='robot1',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['diffdrive_controller'] + controller_manager_timeout,
@@ -74,6 +78,7 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
+        namespace='robot1',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['joint_state_broadcaster'] + controller_manager_timeout,
@@ -81,18 +86,19 @@ def generate_launch_description():
     ros_control_spawners = [diffdrive_controller_spawner, joint_state_broadcaster_spawner]
 
     robot_description_path = os.path.join(package_dir, 'resource', 'custom_bot.urdf')
-    ros2_control_params = os.path.join(package_dir, 'resource', 'turtlebot_ros2control.yml')
+    ros2_control_params = os.path.join(package_dir, 'resource', 'custom_bot_ros2control.yml')
     use_twist_stamped = 'ROS_DISTRO' in os.environ and (os.environ['ROS_DISTRO'] in ['rolling', 'jazzy'])
     if use_twist_stamped:
-        mappings = [('/diffdrive_controller/cmd_vel', '/cmd_vel'), ('/diffdrive_controller/odom', '/odom')]
+        mappings = [('/diffdrive_controller/cmd_vel', '/robot1/cmd_vel'), ('/diffdrive_controller/odom', '/robot1/odom')]
     else:
-        mappings = [('/diffdrive_controller/cmd_vel_unstamped', '/cmd_vel'), ('/diffdrive_controller/odom', '/odom')]
+        mappings = [('/diffdrive_controller/cmd_vel_unstamped', '/robot1/cmd_vel'), ('/diffdrive_controller/odom', '/robot1/odom')]
     turtlebot_driver = WebotsController(
-        robot_name='CustomBot',
+        robot_name='robot1',
         parameters=[
             {'robot_description': robot_description_path,
              'use_sim_time': use_sim_time,
-             'set_robot_state_publisher': True},
+             'set_robot_state_publisher': True,
+             'update_rate': 50},
             ros2_control_params
         ],
         remappings=mappings,
@@ -103,28 +109,34 @@ def generate_launch_description():
     navigation_nodes = []
     os.environ['TURTLEBOT3_MODEL'] = 'burger'
     nav2_map = os.path.join(package_dir, 'resource', 'turtlebot_example_map.yaml')
-    nav2_params = os.path.join(package_dir, 'resource', 'turtlebot_nav2_params.yaml')
-    if 'turtlebot3_navigation2' in get_packages_with_prefixes():
-        turtlebot_navigation = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(
-                get_package_share_directory('turtlebot3_navigation2'), 'launch', 'navigation2.launch.py')),
-            launch_arguments=[
-                ('map', nav2_map),
-                ('params_file', nav2_params),
-                ('use_sim_time', use_sim_time),
-            ],
-            condition=launch.conditions.IfCondition(use_nav))
+    nav2_params = os.path.join(package_dir, 'resource', 'custom_bot_nav2_params.yaml')
+    if 'turtlebot3_navigation2_custom' in get_packages_with_prefixes():
+        turtlebot_navigation = GroupAction([
+            PushRosNamespace('robot1'),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(
+                    get_package_share_directory('turtlebot3_navigation2_custom'), 'launch', 'navigation2.launch.py')),
+                launch_arguments=[
+                    ('map', nav2_map),
+                    ('params_file', nav2_params),
+                    ('use_sim_time', use_sim_time),
+                ],
+                condition=launch.conditions.IfCondition(use_nav))
+        ])
         navigation_nodes.append(turtlebot_navigation)
 
     # SLAM
-    if 'turtlebot3_cartographer' in get_packages_with_prefixes():
-        turtlebot_slam = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(
-                get_package_share_directory('turtlebot3_cartographer'), 'launch', 'cartographer.launch.py')),
-            launch_arguments=[
-                ('use_sim_time', use_sim_time),
-            ],
-            condition=launch.conditions.IfCondition(use_slam))
+    if 'turtlebot3_cartographer_custom' in get_packages_with_prefixes():
+        turtlebot_slam = GroupAction([
+            PushRosNamespace('robot1'),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(
+                    get_package_share_directory('turtlebot3_cartographer_custom'), 'launch', 'cartographer.launch.py')),
+                launch_arguments=[
+                    ('use_sim_time', use_sim_time),
+                ],
+                condition=launch.conditions.IfCondition(use_slam))
+        ])
         navigation_nodes.append(turtlebot_slam)
 
     # Wait for the simulation to be ready to start navigation nodes

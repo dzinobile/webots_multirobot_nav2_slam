@@ -1,22 +1,22 @@
 <?xml version="1.0" ?>
-<robot name="CustomBot">
+<robot name="robot1">
     <webots>
         <device reference="LDS-01" type="Lidar">
             <ros>
                 <enabled>true</enabled>
                 <updateRate>5</updateRate>
-                <topicName>/scan</topicName>
+                <topicName>/robot1/scan</topicName>
                 <alwaysOn>false</alwaysOn>
-                <frameName>LDS-01</frameName>
+                <frameName>robot1/LDS-01</frameName>
             </ros>
         </device>
 
         <plugin type="webots_ros2_driver::Ros2IMU">
             <enabled>true</enabled>
             <updateRate>20</updateRate>
-            <topicName>/imu</topicName>
+            <topicName>/robot1/imu</topicName>
             <alwaysOn>false</alwaysOn>
-            <frameName>imu_link</frameName>
+            <frameName>robot1/imu_link</frameName>
             <inertialUnitName>inertial_unit</inertialUnitName>
             <gyroName>gyro</gyroName>
             <accelerometerName>accelerometer</accelerometerName>

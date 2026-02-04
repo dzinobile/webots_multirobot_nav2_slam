@@ -108,7 +108,7 @@ PROTO CustomBot [
           translation 0 0.055 0.02
           rotation 0.707105 0 0.707109 -3.141588
           children [
-            DEF RIGHT_WHEEL Pose {
+            DEF LEFT_WHEEL Pose {
               rotation 1 0 0 -1.5708003061004252
               children [
                 USE WHEEL
