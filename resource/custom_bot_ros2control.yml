@@ -22,8 +22,8 @@ diffdrive_controller:
     use_stamped_vel: false
     base_frame_id: "robot1/base_link"
     odom_frame_id: "robot1/odom"
-    global_frame_id: "robot1/map"
-    
+    enable_odom_tf: true
+
     linear:
       x:
         max_velocity: 0.2 # Maximal speed of turtlebot

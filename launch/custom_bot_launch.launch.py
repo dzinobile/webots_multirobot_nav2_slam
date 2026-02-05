@@ -64,13 +64,21 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'robot1/base_link', 'robot1/base_footprint'],
     )
 
+    lidar_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        namespace='robot1',
+        output='screen',
+        arguments=['0', '0', '0.19', '0', '0', '0', 'robot1/base_link', 'robot1/LDS-01'],
+    )
+
     # ROS control spawners
     controller_manager_timeout = ['--controller-manager-timeout', '50']
     controller_manager_prefix = 'python.exe' if os.name == 'nt' else ''
     diffdrive_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        namespace='robot1',
+        # namespace='robot1',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['diffdrive_controller'] + controller_manager_timeout,
@@ -78,7 +86,7 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        namespace='robot1',
+        # namespace='robot1',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['joint_state_broadcaster'] + controller_manager_timeout,
@@ -161,6 +169,7 @@ def generate_launch_description():
 
         robot_state_publisher,
         footprint_publisher,
+        lidar_publisher,
 
         turtlebot_driver,
         waiting_nodes,
