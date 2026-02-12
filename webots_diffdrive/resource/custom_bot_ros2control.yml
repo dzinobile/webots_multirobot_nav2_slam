@@ -13,11 +13,11 @@ diffdrive_controller:
     left_wheel_names: ["left wheel motor"]
     right_wheel_names: ["right wheel motor"]
 
-    wheel_separation: 0.16
-    wheel_radius: 0.033
+    wheel_separation: 0.1
+    wheel_radius: 0.025
 
     # The real separation between wheels is not resulting in a perfect odometry
-    wheel_separation_multiplier: 1.112
+    wheel_separation_multiplier: 1.0
 
     use_stamped_vel: false
     base_frame_id: "robot1/base_link"
