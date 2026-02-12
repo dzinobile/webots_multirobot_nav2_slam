@@ -36,8 +36,10 @@ def generate_launch_description():
             get_package_share_directory('turtlebot3_navigation2_custom'),
             'map',
             'map.yaml'))
+    
+    robot_number = LaunchConfiguration('robot_number')
 
-    param_file_name = TURTLEBOT3_MODEL + '.yaml'
+    param_file_name = TURTLEBOT3_MODEL + f'_{robot_number}.yaml'
     if ROS_DISTRO == 'humble':
         param_dir = LaunchConfiguration(
             'params_file',
@@ -59,7 +61,7 @@ def generate_launch_description():
     rviz_config_dir = os.path.join(
         get_package_share_directory('turtlebot3_navigation2_custom'),
         'rviz',
-        'tb3_navigation2.rviz')
+        f'tb3_navigation2_{robot_number}.rviz')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -71,6 +73,11 @@ def generate_launch_description():
             'params_file',
             default_value=param_dir,
             description='Full path to param file to load'),
+        
+        DeclareLaunchArgument(
+            'robot_number',
+            default_value=1,
+            description='interger robot number'),
 
         DeclareLaunchArgument(
             'use_sim_time',
@@ -83,7 +90,7 @@ def generate_launch_description():
                 'map': map_dir,
                 'use_sim_time': use_sim_time,
                 'params_file': param_dir,
-                'namespace': 'robot1',
+                'namespace': f'robot{robot_number}',
                 }.items(),
         ),
 
@@ -93,6 +100,6 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', rviz_config_dir],
             parameters=[{'use_sim_time': use_sim_time}],
-            remappings=[('/tf', '/robot1/tf'), ('/tf_static', '/robot1/tf_static')],
+            remappings=[('/tf', f'/robot{robot_number}/tf'), ('/tf_static', f'/robot{robot_number}/tf_static')],
             output='screen'),
     ])

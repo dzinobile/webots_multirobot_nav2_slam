@@ -46,65 +46,78 @@ def generate_launch_description():
         ros2_supervisor=True
     )
 
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        namespace='robot1',
-        output='screen',
-        parameters=[{
-            'robot_description': '<robot name=""><link name=""/></robot>'
-        }],
-        remappings=[('/tf', '/robot1/tf'), ('/tf_static', '/robot1/tf_static')],
-    )
+    robot_state_publishers = []
+    footprint_publishers = []
+    lidar_publishers = []
+    turtlebot_drivers = []
+    waiting_nodes = []
+    for i in range(1,3):
 
-    footprint_publisher = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        namespace='robot1',
-        output='screen',
-        arguments=['0', '0', '0', '0', '0', '0', 'robot1/base_link', 'robot1/base_footprint'],
-        remappings=[('/tf', '/robot1/tf'), ('/tf_static', '/robot1/tf_static')],
-    )
+        robot_state_publisher = Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            namespace=f'robot{i}',
+            output='screen',
+            parameters=[{
+                'robot_description': '<robot name=""><link name=""/></robot>'
+            }],
+            remappings=[('/tf', f'/robot{i}/tf'), ('/tf_static', f'/robot{i}/tf_static')],
+        )
+        robot_state_publishers.append(robot_state_publisher)
 
-    lidar_publisher = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        namespace='robot1',
-        output='screen',
-        arguments=['0', '0', '0.19', '0', '0', '0', 'robot1/base_link', 'robot1/LDS-01'],
-        remappings=[('/tf', '/robot1/tf'), ('/tf_static', '/robot1/tf_static')],
-    )
+        footprint_publisher = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            namespace=f'robot{i}',
+            output='screen',
+            arguments=['0', '0', '0', '0', '0', '0', f'robot{i}/base_link', f'robot{i}/base_footprint'],
+            remappings=[('/tf', f'/robot{i}/tf'), ('/tf_static', f'/robot{i}/tf_static')],
+        )
+        footprint_publishers.append(footprint_publisher)
 
-    # ROS control spawners
-    controller_manager_timeout = ['--controller-manager-timeout', '50']
-    controller_manager_prefix = 'python.exe' if os.name == 'nt' else ''
-    diffdrive_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        # namespace='robot1',
-        output='screen',
-        prefix=controller_manager_prefix,
-        arguments=['diffdrive_controller'] + controller_manager_timeout,
-    )
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        # namespace='robot1',
-        output='screen',
-        prefix=controller_manager_prefix,
-        arguments=['joint_state_broadcaster'] + controller_manager_timeout,
-    )
-    ros_control_spawners = [diffdrive_controller_spawner, joint_state_broadcaster_spawner]
+        lidar_publisher = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            namespace=f'robot{i}',
+            output='screen',
+            arguments=['0', '0', '0.19', '0', '0', '0', f'robot{i}/base_link', f'robot{i}/LDS-01'],
+            remappings=[('/tf', f'/robot{i}/tf'), ('/tf_static', f'/robot{i}/tf_static')],
+        )
+        lidar_publishers.append(lidar_publisher)
 
-    robot_description_path = os.path.join(package_dir, 'resource', 'custom_bot.urdf')
-    ros2_control_params = os.path.join(package_dir, 'resource', 'custom_bot_ros2control.yml')
-    use_twist_stamped = 'ROS_DISTRO' in os.environ and (os.environ['ROS_DISTRO'] in ['rolling', 'jazzy'])
-    if use_twist_stamped:
-        mappings = [('/diffdrive_controller/cmd_vel', '/robot1/cmd_vel'), ('/diffdrive_controller/odom', '/robot1/odom'), ('/tf', '/robot1/tf')]
-    else:
-        mappings = [('/diffdrive_controller/cmd_vel_unstamped', '/robot1/cmd_vel'), ('/diffdrive_controller/odom', '/robot1/odom'), ('/tf', '/robot1/tf')]
-    turtlebot_driver = WebotsController(
-        robot_name='robot1',
+        # ROS control spawners
+        controller_manager_timeout = ['--controller-manager-timeout', '50']
+        controller_manager_prefix = 'python.exe' if os.name == 'nt' else ''
+        diffdrive_controller_spawner = Node(
+            package='controller_manager',
+            executable='spawner',
+            name=f'diffdrive_controller_spawner_robot{i}',
+            namespace=f'robot{i}',
+            output='screen',
+            prefix=controller_manager_prefix,
+            arguments=['diffdrive_controller'] + controller_manager_timeout,
+        )
+        joint_state_broadcaster_spawner = Node(
+            package='controller_manager',
+            executable='spawner',
+            name=f'joint_state_broadcaster_spawner_robot{i}',
+            namespace=f'robot{i}',
+            output='screen',
+            prefix=controller_manager_prefix,
+            arguments=['joint_state_broadcaster'] + controller_manager_timeout,
+        )
+        ros_control_spawners = [diffdrive_controller_spawner, joint_state_broadcaster_spawner]
+
+        robot_description_path = os.path.join(package_dir, 'resource', f'custom_bot_{i}.urdf')
+        ros2_control_params = os.path.join(package_dir, 'resource', f'custom_bot_{i}_ros2control.yml')
+        use_twist_stamped = 'ROS_DISTRO' in os.environ and (os.environ['ROS_DISTRO'] in ['rolling', 'jazzy'])
+        if use_twist_stamped:
+            mappings = [('/diffdrive_controller/cmd_vel', f'/robot{i}/cmd_vel'), ('/diffdrive_controller/odom', f'/robot{i}/odom'), ('/tf', f'/robot{i}/tf')]
+        else:
+            mappings = [('/diffdrive_controller/cmd_vel_unstamped', f'/robot{i}/cmd_vel'), ('/diffdrive_controller/odom', f'/robot{i}/odom'), ('/tf', f'/robot{i}/tf')]
+        turtlebot_driver = WebotsController(
+        robot_name=f'robot{i}',
+        namespace=f'robot{i}',
         parameters=[
             {'robot_description': robot_description_path,
              'use_sim_time': use_sim_time,
@@ -114,47 +127,51 @@ def generate_launch_description():
         ],
         remappings=mappings,
         respawn=True
-    )
+        )
+        turtlebot_drivers.append(turtlebot_driver)
 
-    # Navigation
-    navigation_nodes = []
-    os.environ['TURTLEBOT3_MODEL'] = 'burger'
-    nav2_map = os.path.join(package_dir, 'resource', 'turtlebot_example_map.yaml')
-    nav2_params = os.path.join(package_dir, 'resource', 'custom_bot_nav2_params.yaml')
-    if 'turtlebot3_navigation2_custom' in get_packages_with_prefixes():
-        turtlebot_navigation = GroupAction([
-            PushRosNamespace('robot1'),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(
-                    get_package_share_directory('turtlebot3_navigation2_custom'), 'launch', 'navigation2.launch.py')),
-                launch_arguments=[
-                    ('map', nav2_map),
-                    ('params_file', nav2_params),
-                    ('use_sim_time', use_sim_time),
-                ],
-                condition=launch.conditions.IfCondition(use_nav))
-        ])
-        navigation_nodes.append(turtlebot_navigation)
+        # Navigation
+        navigation_nodes = []
+        os.environ['TURTLEBOT3_MODEL'] = 'burger'
+        nav2_map = os.path.join(package_dir, 'resource', 'turtlebot_example_map.yaml')
+        nav2_params = os.path.join(package_dir, 'resource', f'custom_bot_{i}_nav2_params.yaml')
+        if 'turtlebot3_navigation2_custom' in get_packages_with_prefixes():
+            turtlebot_navigation = GroupAction([
+                PushRosNamespace(f'robot{i}'),
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(os.path.join(
+                        get_package_share_directory('turtlebot3_navigation2_custom'), 'launch', 'navigation2.launch.py')),
+                    launch_arguments=[
+                        ('map', nav2_map),
+                        ('params_file', nav2_params),
+                        ('use_sim_time', use_sim_time),
+                        ('robot_number', i)
+                    ],
+                    condition=launch.conditions.IfCondition(use_nav))
+            ])
+            navigation_nodes.append(turtlebot_navigation)
 
-    # SLAM
-    if 'turtlebot3_cartographer_custom' in get_packages_with_prefixes():
-        turtlebot_slam = GroupAction([
-            PushRosNamespace('robot1'),
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(
-                    get_package_share_directory('turtlebot3_cartographer_custom'), 'launch', 'cartographer.launch.py')),
-                launch_arguments=[
-                    ('use_sim_time', use_sim_time),
-                ],
-                condition=launch.conditions.IfCondition(use_slam))
-        ])
-        navigation_nodes.append(turtlebot_slam)
+        # SLAM
+        if 'turtlebot3_cartographer_custom' in get_packages_with_prefixes():
+            turtlebot_slam = GroupAction([
+                PushRosNamespace(f'robot{i}'),
+                IncludeLaunchDescription(
+                    PythonLaunchDescriptionSource(os.path.join(
+                        get_package_share_directory('turtlebot3_cartographer_custom'), 'launch', 'cartographer.launch.py')),
+                    launch_arguments=[
+                        ('use_sim_time', use_sim_time),
+                        ('robot_number', i)
+                    ],
+                    condition=launch.conditions.IfCondition(use_slam))
+            ])
+            navigation_nodes.append(turtlebot_slam)
 
-    # Wait for the simulation to be ready to start navigation nodes
-    waiting_nodes = WaitForControllerConnection(
-        target_driver=turtlebot_driver,
-        nodes_to_start=navigation_nodes + ros_control_spawners
-    )
+        # Wait for the simulation to be ready to start navigation nodes
+        waiting_node = WaitForControllerConnection(
+            target_driver=turtlebot_driver,
+            nodes_to_start=navigation_nodes + ros_control_spawners
+        )
+        waiting_nodes.append(waiting_node)
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -170,12 +187,12 @@ def generate_launch_description():
         webots,
         webots._supervisor,
 
-        robot_state_publisher,
-        footprint_publisher,
-        lidar_publisher,
+        *robot_state_publishers,
+        *footprint_publishers,
+        *lidar_publishers,
 
-        turtlebot_driver,
-        waiting_nodes,
+        *turtlebot_drivers,
+        *waiting_nodes,
 
         # This action will kill all nodes once the Webots simulation has exited
         launch.actions.RegisterEventHandler(
