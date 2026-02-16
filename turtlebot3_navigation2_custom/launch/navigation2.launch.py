@@ -89,6 +89,7 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'params_file': param_dir,
                 'namespace': ['robot', robot_number],
+                'use_namespace': 'true',
                 }.items(),
         ),
 

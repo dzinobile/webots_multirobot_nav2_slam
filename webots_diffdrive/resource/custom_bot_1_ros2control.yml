@@ -21,8 +21,8 @@ robot1:
       wheel_separation_multiplier: 1.0
 
       use_stamped_vel: false
-      base_frame_id: "robot1/base_link"
-      odom_frame_id: "robot1/odom"
+      base_frame_id: "base_link"
+      odom_frame_id: "odom"
       enable_odom_tf: true
 
       linear:

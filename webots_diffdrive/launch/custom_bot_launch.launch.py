@@ -69,7 +69,7 @@ def generate_launch_description():
             executable='static_transform_publisher',
             namespace=f'robot{i}',
             output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', f'robot{i}/base_link', f'robot{i}/base_footprint'],
+            arguments=['0', '0', '0', '0', '0', '0', f'/robot{i}/base_link', f'/robot{i}/base_footprint'],
             remappings=[('/tf', f'/robot{i}/tf'), ('/tf_static', f'/robot{i}/tf_static')],
         )
         footprint_publishers.append(footprint_publisher)
