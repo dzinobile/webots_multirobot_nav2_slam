@@ -1,4 +1,4 @@
-robot2:
+ROBOT_NS:
   controller_manager:
     ros__parameters:
       update_rate: 50

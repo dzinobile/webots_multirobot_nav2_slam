@@ -47,19 +47,19 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        robot1/base_footprint:
+        ROBOT_NS/base_footprint:
           Value: true
-        robot1/base_link:
+        ROBOT_NS/base_link:
           Value: true
-        robot1/imu_link:
+        ROBOT_NS/imu_link:
           Value: true
-        robot1/map:
+        ROBOT_NS/map:
           Value: true
-        robot1/odom:
+        ROBOT_NS/odom:
           Value: true
-        robot1/wheel_left_link:
+        ROBOT_NS/wheel_left_link:
           Value: true
-        robot1/wheel_right_link:
+        ROBOT_NS/wheel_right_link:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -67,15 +67,15 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        robot1/map:
-          robot1/odom:
-            robot1/base_footprint:
-              robot1/base_link:
-                robot1/imu_link:
+        ROBOT_NS/map:
+          ROBOT_NS/odom:
+            ROBOT_NS/base_footprint:
+              ROBOT_NS/base_link:
+                ROBOT_NS/imu_link:
                   {}
-                robot1/wheel_left_link:
+                ROBOT_NS/wheel_left_link:
                   {}
-                robot1/wheel_right_link:
+                ROBOT_NS/wheel_right_link:
                   {}
       Update Interval: 0
       Value: true
@@ -109,7 +109,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/scan
+        Value: /ROBOT_NS/scan
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -150,7 +150,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/odom
+        Value: /ROBOT_NS/odom
       Value: false
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map
@@ -164,13 +164,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/map
+        Value: /ROBOT_NS/map
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/map_updates
+        Value: /ROBOT_NS/map_updates
       Use Timestamp: false
       Value: true
     - Class: rviz_common/Group
@@ -189,13 +189,13 @@ Visualization Manager:
                 Filter size: 10
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/global_costmap/costmap
+                Value: /ROBOT_NS/global_costmap/costmap
               Update Topic:
                 Depth: 5
                 Durability Policy: Volatile
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/global_costmap/costmap_updates
+                Value: /ROBOT_NS/global_costmap/costmap_updates
               Use Timestamp: false
               Value: true
             - Alpha: 1
@@ -224,7 +224,7 @@ Visualization Manager:
                 Filter size: 10
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/global_plan
+                Value: /ROBOT_NS/global_plan
               Value: true
           Enabled: true
           Name: Global Map
@@ -241,7 +241,7 @@ Visualization Manager:
                 Filter size: 10
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/local_costmap/footprint
+                Value: /ROBOT_NS/local_costmap/footprint
               Value: true
             - Alpha: 0.699999988079071
               Class: rviz_default_plugins/Map
@@ -255,13 +255,13 @@ Visualization Manager:
                 Filter size: 10
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/local_costmap/costmap
+                Value: /ROBOT_NS/local_costmap/costmap
               Update Topic:
                 Depth: 5
                 Durability Policy: Volatile
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/local_costmap/costmap_updates
+                Value: /ROBOT_NS/local_costmap/costmap_updates
               Use Timestamp: false
               Value: true
             - Alpha: 1
@@ -290,7 +290,7 @@ Visualization Manager:
                 Filter size: 10
                 History Policy: Keep Last
                 Reliability Policy: Reliable
-                Value: /robot1/local_plan
+                Value: /ROBOT_NS/local_plan
               Value: true
           Enabled: true
           Name: Local Map
@@ -313,7 +313,7 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /robot1/particlecloud
+            Value: /ROBOT_NS/particlecloud
           Value: true
       Enabled: false
       Name: Navigation
@@ -349,7 +349,7 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /robot1/scan_matched_points2
+            Value: /ROBOT_NS/scan_matched_points2
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
@@ -363,7 +363,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /robot1/trajectory_node_list
+            Value: /ROBOT_NS/trajectory_node_list
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
@@ -375,7 +375,7 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /robot1/constraint_list
+            Value: /ROBOT_NS/constraint_list
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
@@ -387,14 +387,14 @@ Visualization Manager:
             Durability Policy: Volatile
             History Policy: Keep Last
             Reliability Policy: Reliable
-            Value: /robot1/landmark_poses_list
+            Value: /ROBOT_NS/landmark_poses_list
           Value: false
       Enabled: true
       Name: Cartographer
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: robot1/map
+    Fixed Frame: ROBOT_NS/map
     Frame Rate: 30
   Name: root
   Tools:
@@ -409,7 +409,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/move_base_simple/goal
+        Value: /ROBOT_NS/move_base_simple/goal
     - Class: rviz_default_plugins/PublishPoint
       Single click: true
       Topic:
@@ -417,7 +417,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot1/clicked_point
+        Value: /ROBOT_NS/clicked_point
     - Class: rviz_default_plugins/SetInitialPose
       Covariance x: 0.25
       Covariance y: 0.25
@@ -427,7 +427,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: robot1/initialpose
+        Value: ROBOT_NS/initialpose
   Transformation:
     Current:
       Class: rviz_default_plugins/TF

@@ -1,22 +1,22 @@
 <?xml version="1.0" ?>
-<robot name="robot2">
+<robot name="ROBOT_NS">
     <webots>
         <device reference="LDS-01" type="Lidar">
             <ros>
                 <enabled>true</enabled>
                 <updateRate>5</updateRate>
-                <topicName>/robot2/scan</topicName>
+                <topicName>/ROBOT_NS/scan</topicName>
                 <alwaysOn>false</alwaysOn>
-                <frameName>robot2/LDS-01</frameName>
+                <frameName>ROBOT_NS/LDS-01</frameName>
             </ros>
         </device>
 
         <plugin type="webots_ros2_driver::Ros2IMU">
             <enabled>true</enabled>
             <updateRate>20</updateRate>
-            <topicName>/robot2/imu</topicName>
+            <topicName>/ROBOT_NS/imu</topicName>
             <alwaysOn>false</alwaysOn>
-            <frameName>robot2/imu_link</frameName>
+            <frameName>ROBOT_NS/imu_link</frameName>
             <inertialUnitName>inertial_unit</inertialUnitName>
             <gyroName>gyro</gyroName>
             <accelerometerName>accelerometer</accelerometerName>

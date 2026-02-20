@@ -38,46 +38,7 @@ TexturedBackground {
   texture "empty_office"
   skybox FALSE
 }
-CustomBot {
-  name "robot1"
-  translation 6.36 0 0
-  controller "<extern>"
-  controllerArgs [
-    ""
-  ]
-  extensionSlot [
-    Solid {
-      name "imu_link"
-    }
-    GPS {
-    }
-    InertialUnit {
-      name "inertial_unit"
-    }
-    RobotisLds01 {
-    }
-  ]
-}
-CustomBot {
-  name "robot2"
-  translation 6.36 0.5 0
-  controller "<extern>"
-  controllerArgs [
-    ""
-  ]
-  extensionSlot [
-    Solid {
-      name "imu_link"
-    }
-    GPS {
-    }
-    InertialUnit {
-      name "inertial_unit"
-    }
-    RobotisLds01 {
-    }
-  ]
-}
+# ROBOT_DEFINITIONS
 PottedTree {
   translation 7 -4 0
   rotation 0 0 1 1.5708

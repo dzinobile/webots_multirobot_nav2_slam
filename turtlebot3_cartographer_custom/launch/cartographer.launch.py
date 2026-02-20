@@ -15,94 +15,113 @@
 # Author: Darby Lim
 
 import os
+import tempfile
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
-from launch.conditions import IfCondition
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
-from launch.substitutions import ThisLaunchFileDir
 from launch_ros.actions import Node
 
 
+def launch_setup(context, *args, **kwargs):
+    robot_number = context.launch_configurations['robot_number']
+    use_sim_time = context.launch_configurations['use_sim_time']
+    use_rviz = context.launch_configurations['use_rviz']
+    resolution = context.launch_configurations['resolution']
+    publish_period_sec = context.launch_configurations['publish_period_sec']
+
+    robot_ns = f'robot{robot_number}'
+    pkg_dir = get_package_share_directory('turtlebot3_cartographer_custom')
+
+    # Generate Lua config from single template
+    lua_template = os.path.join(pkg_dir, 'config', 'turtlebot3_lds_2d.lua')
+    with open(lua_template) as f:
+        lua_content = f.read().replace('ROBOT_NS', robot_ns)
+    tmp_lua = tempfile.NamedTemporaryFile(
+        prefix=f'cartographer_{robot_ns}_', suffix='.lua', delete=False, mode='w')
+    tmp_lua.write(lua_content)
+    lua_path = tmp_lua.name
+    tmp_lua.close()
+
+    # Generate RViz config from single template
+    rviz_template = os.path.join(pkg_dir, 'rviz', 'tb3_cartographer.rviz')
+    with open(rviz_template) as f:
+        rviz_content = f.read().replace('ROBOT_NS', robot_ns)
+    tmp_rviz = tempfile.NamedTemporaryFile(
+        prefix=f'cartographer_{robot_ns}_', suffix='.rviz', delete=False, mode='w')
+    tmp_rviz.write(rviz_content)
+    rviz_path = tmp_rviz.name
+    tmp_rviz.close()
+
+    use_sim_time_bool = use_sim_time.lower() == 'true'
+
+    nodes = [
+        Node(
+            package='cartographer_ros',
+            executable='cartographer_node',
+            name='cartographer_node',
+            namespace=robot_ns,
+            remappings=[
+                ('/tf', f'/{robot_ns}/tf'),
+                ('/tf_static', f'/{robot_ns}/tf_static'),
+                ('scan', f'/{robot_ns}/scan'),
+            ],
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time_bool}],
+            arguments=['-configuration_directory', os.path.dirname(lua_path),
+                       '-configuration_basename', os.path.basename(lua_path)],
+        ),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(os.path.dirname(__file__), 'occupancy_grid.launch.py')),
+            launch_arguments={
+                'use_sim_time': use_sim_time,
+                'resolution': resolution,
+                'publish_period_sec': publish_period_sec,
+                'robot_number': robot_number,
+            }.items(),
+        ),
+    ]
+
+    if use_rviz.lower() == 'true':
+        nodes.append(Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_path],
+            parameters=[{'use_sim_time': use_sim_time_bool}],
+            remappings=[
+                ('/tf', f'/{robot_ns}/tf'),
+                ('/tf_static', f'/{robot_ns}/tf_static'),
+            ],
+            output='screen',
+        ))
+
+    return nodes
+
+
 def generate_launch_description():
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    use_rviz = LaunchConfiguration('use_rviz', default='true')
-    robot_number = LaunchConfiguration('robot_number', default='1')
-    turtlebot3_cartographer_custom_prefix = get_package_share_directory('turtlebot3_cartographer_custom')
-    cartographer_config_dir = LaunchConfiguration('cartographer_config_dir', default=os.path.join(
-                                                  turtlebot3_cartographer_custom_prefix, 'config'))
-    configuration_basename = LaunchConfiguration('configuration_basename',
-                                                 default=['turtlebot3_lds_2d_',robot_number,'.lua'])
-
-    resolution = LaunchConfiguration('resolution', default='0.05')
-    publish_period_sec = LaunchConfiguration('publish_period_sec', default='1.0')
-
-    rviz_dir = os.path.join(
-        get_package_share_directory('turtlebot3_cartographer_custom'), 'rviz')
-
     return LaunchDescription([
         DeclareLaunchArgument(
-            'cartographer_config_dir',
-            default_value=cartographer_config_dir,
-            description='Full path to config file to load'),
-        DeclareLaunchArgument(
-            'configuration_basename',
-            default_value=configuration_basename,
-            description='Name of lua file for cartographer'),
+            'robot_number',
+            default_value='1',
+            description='robot integer number'),
         DeclareLaunchArgument(
             'use_sim_time',
             default_value='false',
             description='Use simulation (Gazebo) clock if true'),
         DeclareLaunchArgument(
-            'robot_number',
-            default_value='1',
-            description='robot integer number'),
-
-        Node(
-            package='cartographer_ros',
-            executable='cartographer_node',
-            name='cartographer_node',
-            namespace=['robot', robot_number],
-            remappings=[
-                ('/tf', ['/robot', robot_number, '/tf']),
-                ('/tf_static', ['/robot', robot_number, '/tf_static']),
-                ('scan', ['/robot', robot_number, '/scan']),
-            ],
-            output='screen',
-            parameters=[{'use_sim_time': use_sim_time}],
-            arguments=['-configuration_directory', cartographer_config_dir,
-                       '-configuration_basename', configuration_basename]),
-
+            'use_rviz',
+            default_value='true',
+            description='Launch RViz'),
         DeclareLaunchArgument(
             'resolution',
-            default_value=resolution,
+            default_value='0.05',
             description='Resolution of a grid cell in the published occupancy grid'),
-
         DeclareLaunchArgument(
             'publish_period_sec',
-            default_value=publish_period_sec,
+            default_value='1.0',
             description='OccupancyGrid publishing period'),
-
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/occupancy_grid.launch.py']),
-            launch_arguments={'use_sim_time': use_sim_time, 'resolution': resolution,
-                              'publish_period_sec': publish_period_sec,
-                              'robot_number': robot_number,}.items(),
-        ),
-
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', [rviz_dir + '/tb3_cartographer_', robot_number, '.rviz']],
-            parameters=[{'use_sim_time': use_sim_time}],
-            condition=IfCondition(use_rviz),
-            remappings=[
-                ('/tf', ['/robot', robot_number, '/tf']),
-                ('/tf_static', ['/robot', robot_number, '/tf_static']),
-            ],
-            output='screen'),
+        OpaqueFunction(function=launch_setup),
     ])
